@@ -3,7 +3,7 @@ Baseline을 개선하여 음성의 명료도 저하를 극복하기 위한 딥�
 
 본 모델의 특징은 다음과 같습니다.
 * 음성 명료도 향상을 위하여 frequency domain에서 BWE를 행하는 Sequnetial neural network 기반의 기술
-* 새로운 목적함수 Huber loss와 Dropout적용을 통한 성능향상
+* 새로운 목적함수 Huber loss와 Dropout적용을 통한 성능향상.
 
 TIMIT DB로 훈련하였으며 train set은 low pass filter를 통과하여 고역대(4 kHz ~ 8 kHz)가 소실된 4000개의 문장을 사용하였습니다. Test set은 저역대와 고역대(0 kHz ~ 8 kHz)가 모두 온전한 1800개의 문장을 사요하였습니다. Low pas filter는 FIR 필터 type I, 필터계수 101, cutoff 0.5를 파이썬 Scipy 모듈을 사용하여 구현하였습니다.
 
