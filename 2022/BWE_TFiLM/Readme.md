@@ -18,8 +18,6 @@ Pip3 install -r tfilm_tf_requirements.txt
 1. 2021/MIR 폴더를 참고하여 마스크 착용/미착용 데어터셋 생성
 2. h5_data.py를 사용하여 .h5파일형식의 trainset과 test set 각각 생성
 
-Testset은 1번 과정을 생략하고 위의 방식으로 진행하여 dataset 준비.
-
 ## Training
 to train the model
 ```
