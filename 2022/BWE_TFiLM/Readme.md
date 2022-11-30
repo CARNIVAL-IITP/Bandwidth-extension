@@ -9,6 +9,7 @@
 * Tensorflow
 * Numpy
 * h5py
+
 To install all required packages via pip command
 ```
 Pip3 install -r tfilm_tf_requirements.txt
