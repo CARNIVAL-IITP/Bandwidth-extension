@@ -96,12 +96,13 @@ config_foler 폴더에 있는 참조
 
 ### Audio generation & Evaluation
 * Modify parameters in `main.py`
+```
 SAVE = True
 ONNX = False
 ONNX_ZERO = False
 CPU = False
 SINGLE = False 
-
+```
 * Run `main.py` with a version number to be evaluated:
     ```
     $ python main.py --mode eval --version 5
