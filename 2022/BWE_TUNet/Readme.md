@@ -8,7 +8,7 @@
 * Attention mechanism을 사용하는 AFiLM을 추가하여 TUNet_realtime_ATAFiLM 모델 구조 고도화 
 * 사전학습 Pretraining을 통하여 성능향상 도모
 
-## Setup 
+## 1. Setup 
 자세한 환경 설치 방법은 위 링크 참고
 
 ### Requirements
@@ -21,7 +21,7 @@ To install all required packages via pip command
 Pip3 install -r tunet_requirments.txt
 ```
 
-## Prpare dataset
+## 2. Prepare dataset
 
 영어 음성 VCTK DB 및 한굿어 음성 SITEC DB 사용
 SITEC DB는 다음과 같은 room환경에서 RIR을 통하여 데이터셋 생성
@@ -69,7 +69,7 @@ SITEC DB는 다음과 같은 room환경에서 RIR을 통하여 데이터셋 생�
 * In order to load the datasets, text files that contain training and testing audio paths are required. We have
   prepared `train.txt` and `test.txt` files in `./data/vctk` and `./data/sitec` directories.
 
-## Training
+## 3. Training
 
 ### Configuration
 config_foler 폴더에 있는 참조
@@ -92,7 +92,7 @@ config_foler 폴더에 있는 참조
     $ python main.py --mode train --version {version number of pretrained model}
     ```
 
-## Test
+## 4. Test
 
 ### Audio generation & Evaluation
 * Modify parameters in `main.py`
@@ -119,5 +119,5 @@ SINGLE = False
       python inference_onnx.py
       ```
 
-## Citation
+## 5. Reference
 * TUNet paper: https://ieeexplore.ieee.org/abstract/document/9747699
