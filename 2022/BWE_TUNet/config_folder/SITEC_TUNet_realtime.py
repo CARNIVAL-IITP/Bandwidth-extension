@@ -1,0 +1,88 @@
+class CONFIG:
+    gpus = "0"  # List of gpu devices
+
+    # Bandwidth extension and masked speech modeling experiment config
+    class TASK:
+        task = 'bwe'  # Task to execute. Should either be 'msm' or 'bwe'
+        assert task in ['msm', 'nae', 'nb_bwe' ,'msm+nb_bwe','bwe'], "task should either be 'msm' or 'bwe'"
+
+        mask_chunk = 256  # Size of masked chunks for MSM. Should be a power of two
+        mask_ratio = 0.2  # MSM masking ratio in range (0, 1)
+
+        '''
+        BWE downsampling method. Should be either 'cheby', 'augment' or resampy supported methods.
+            'cheby' uses the Scipy's decimation based on the Chebyshev Type-I lowpass filter.
+            'augment' uses the Chebyshev Type-I filters with random orders and ripples.
+        '''
+        downsampling = 'cheby'
+
+        # resampy supported methods
+        resampy = ['kaiser_best', 'kaiser_fast', 'fft', 'polyphase', 'linear', 'zero_order_hold', 'sinc_best',
+                   'sinc_medium', 'sinc_fastest', 'soxr_vhq', 'soxr_hq', 'soxr_mq', 'soxr_lq', 'soxr_qq']
+        assert downsampling in ['augment', 'cheby'] + resampy, 'Invalid downsampling method'
+        orders = [8]#range(1, 11)  # the Chebyshev Type-I orders
+        ripples = [0.05]#[1e-9, 1e-6, 1e-3, 1, 5]  # the Chebyshev Type-I ripples
+
+    class TRAIN:
+        batch_size = 1  # number of audio files per batch
+        lr = 3e-4  # learning rate
+        epochs = 100  # max training epochs
+        workers = 8  # number of dataloader workers
+        val_split = 0.1  # validation set proportion
+        loss_type = 2  # training loss types. 1: MSE loss, 2: MSE and multi-resolution STFT loss
+        assert loss_type in [1, 2], 'Invalid loss_type'
+        mse_weight = 10000  # weight of the MSE loss
+        clipping_val = 1.0  # gradient clipping value
+        patience = 3  # learning rate scheduler's patience
+        factor = 0.5  # learning rate reduction factor
+
+    # Model config
+    class MODEL:
+        causal = True # enable causality
+        tfilm = True  # enable/disable TFiLM layers
+        afilm = False # enable/disable AFiLM layers
+        n_blocks = 64  # number of blocks of TFiLM layers.
+        bottleneck_type = 'lstm'  # bottleneck module. Should either be 'performer', 'lstm' or None
+        assert bottleneck_type in ['performer', 'lstm', None], "Invalid bottleneck_type"
+        kernel_sizes = [64, 16, 8]  # kernel sizes of each convolution/deconvolution layers
+        strides = [4, 4, 4]  # strides of each convolution/deconvolution layers
+        out_channels = [64, 128, 256]  # numbers of filters of each convolution/deconvolution layers
+
+        # Performer bottleneck config
+        class TRANSFORMER:
+            dim_head = 32
+            depth = 3
+            heads = 2
+
+    # Dataset config
+    class DATA:
+        dataset = 'sitec_rir'  # dataset to use. Should either be 'vctk' or 'vivos'
+        '''
+        Dictionary that specifies paths to root directories and train/test text files of each datasets.
+        'root' is the path to the dataset and each line of the train.txt/test.txt files should contains the path to an
+        audio file from 'root'. 
+        '''
+        data_dir = {'vctk': {'root': 'data/vctk/wav48',
+                             'train': "data/vctk/train.txt",
+                             'test': "data/vctk/test.txt"},
+                    'TIMIT': {'root': 'data/TIMIT',
+                             'train': 'data/TIMIT/train.txt',
+                             'test': 'data/TIMIT/test.txt'},
+                    'sitec_rir': {'root': 'data/sitec_rir',
+                             'train': 'data/sitec_rir/sitec_rir_each_tr.txt',
+                             'test': 'data/sitec_rir/sitec_rir_each_test.txt',
+                             'val' : 'data/sitec_rir/sitec_rir_each_val.txt'}}
+
+        assert dataset in data_dir.keys(), 'Unknown dataset.'
+        sr = 16000  # target audio sampling rate
+        ratio = 2  # downsampling ratio
+        window_size = 4096  # size of the sliding window
+        stride = 2048  # stride of the sliding window. Should be divisible to 'mask_chunk' if the task is MSM.
+
+    class LOG:
+        log_dir = 'lightning_logs'  # checkpoint and log directory
+        sample_path = 'audio_samples'  # path to save generated audio samples in evaluation.
+
+    class TEST:
+        in_dir = 'test_samples'  # path to test audio inputs
+        out_dir = 'test_samples'  # path to generated outputs
