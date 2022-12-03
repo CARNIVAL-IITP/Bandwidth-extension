@@ -64,8 +64,7 @@ SITEC DB는 다음과 같은 room환경에서 RIR을 통하여 데이터셋 생�
             |--sitec_rir_each_test.txt
             |--sitec_rir_each_val.txt
     ```
-* In order to load the datasets, text files that contain training and testing audio paths are required. We have
-  prepared `train.txt` and `test.txt` files in `./data/vctk` and `./data/sitec` directories.
+* In order to load the datasets, text files that contain training and testing audio paths are required.
 
 ## 3. Training
 
