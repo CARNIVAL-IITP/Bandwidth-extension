@@ -23,7 +23,7 @@ Pip3 install -r tunet_requirments.txt
 
 ## 2. Prepare dataset
 
-영어 음성 VCTK DB 및 한굿어 음성 SITEC DB 사용
+영어 음성 VCTK DB 및 한국어 음성 SITEC DB 사용
 SITEC DB는 다음과 같은 room환경에서 RIR을 통하여 데이터셋 생성
 
 * Download and extract the datasets for VCTK:
