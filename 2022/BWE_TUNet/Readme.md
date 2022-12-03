@@ -29,9 +29,7 @@ SITEC DB는 다음과 같은 room환경에서 RIR을 통하여 데이터셋 생�
 * Download and extract the datasets for VCTK:
     ```
     $ wget http://www.udialogue.org/download/VCTK-Corpus.tar.gz -O data/vctk/VCTK-Corpus.tar.gz
-    $ wget https://ailab.hcmus.edu.vn/assets/vivos.tar.gz -O data/vivos/vivos.tar.gz
     $ tar -zxvf data/vctk/VCTK-Corpus.tar.gz -C data/vctk/ --strip-components=1
-    $ tar -zxvf data/vivos/vivos.tar.gz -C data/vivos/ --strip-components=1
     ```
 
   After extracting the datasets, your `./data` directory should look like this:
