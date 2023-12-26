@@ -90,30 +90,11 @@ config_foler 폴더에 있는 참조
 ## 4. Test
 
 ### Audio generation & Evaluation
-* Modify parameters in `main.py`
-```
-SAVE = True
-ONNX = False
-ONNX_ZERO = False
-CPU = False
-SINGLE = False 
-```
-* Run `main.py` with a version number to be evaluated:
-    ```
-    $ python main.py --mode eval --version 5
-    ```
 
-  ### ONNX inferencing
-  We provide ONNX inferencing scripts and the best ONNX model (converted from the best checkpoint) at `lightning_logs/best_model.onnx`.
-  * Convert a checkpoint to an ONNX model:
-      ```
-      python main.py --mode onnx --version 5
-      ```
-    The converted ONNX model will be saved to `lightning_logs/version_5/checkpoints`.
-  * Put test audios in `test_samples` and inference with the converted ONNX model (see `inference_onnx.py` for more details):
-       ```
-      python inference_onnx.py
-      ```
+* Run `enhancement.py`
+    ```
+    $ python enhancement.py --test_dir <your_test_dir> --enhanced_dir <your_enhanced_dir> --ckpt <path_to_model_checkpoint>
+    ```
 
 ## 5. Reference
 * SGMSE paper: https://ieeexplore.ieee.org/abstract/document/10149431
