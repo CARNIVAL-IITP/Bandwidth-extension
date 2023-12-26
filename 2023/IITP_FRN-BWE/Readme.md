@@ -2,8 +2,8 @@
 본 코드는 2021년도 과학기술통신부의 재원으로 정보통신기획평가원(IITP)의 지원을 받아 수행한 "원격다자간 영상회의에서의 음성 품질 고도화 기술개발" 과제의 일환으로 공개된 명료도 향상 부문의 3차년도 코드입니다. 
 
 본 코드의 특징은 다음과 같습니다.
-* This code is from https://github.com/NXTProduct/TUNet](https://github.com/sp-uhh/sgmse
-* 음성 명료도 저하 극복을 위한 대역폭 확장 BWE 알고리즘 딥러닝 모델 SGMSE를 baseline으로 선정
+* This code is from [https://github.com/NXTProduct/TUNet](https://github.com/sp-uhh/sgmse](https://github.com/Crystalsound/FRN)
+* 음성 명료도 저하 극복을 위한 대역폭 확장 BWE 알고리즘 딥러닝 모델 FRN을 baseline으로 선정
 * Continual Learning Approach for Speech Super-resolution (CLASS) 적용을 통한 모델 성능 고도화 
 
 ## 1. Setup 
@@ -16,7 +16,7 @@
 
 To install all required packages via pip command
 ```
-Pip3 install -r sgmse_requirments.txt
+Pip3 install -r frn_requirments.txt
 ```
 
 ## 2. Prepare dataset
@@ -82,7 +82,9 @@ config_foler 폴더에 있는 참조
     $ python main.py --mode train
     ```
 * To train with pretraining model,
-  Modify parameters in `CONFIG.task` to ['msm', 'nae', 'nb_bwe' ,'msm+nb_bwe','bwe']
+  Go to FRN_BWE-pretraining folder and Modify LOG.pretrained_encoder_path in `config.py`
+  Modify pretraining task in  `config.py` to ['MSM-noisy', 'MSM-clean', 'NAE' ,'NB-BWE+MSM','HB-BWE','PLC']
+  Run `main.py`:
     ```
     $ python main.py --mode train --version {version number of pretrained model}
     ```
@@ -91,10 +93,10 @@ config_foler 폴더에 있는 참조
 
 ### Audio generation & Evaluation
 
-* Run `enhancement.py`
+* Run `main.py` with a version number to be evaluated
     ```
-    $ python enhancement.py --test_dir <your_test_dir> --enhanced_dir <your_enhanced_dir> --ckpt <path_to_model_checkpoint>
+    $ python main.py --mode eval --version {version number of trained model}
     ```
 
 ## 5. Reference
-* SGMSE paper: https://ieeexplore.ieee.org/abstract/document/10149431
+* FRN paper: https://ieeexplore.ieee.org/document/10097132
