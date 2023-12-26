@@ -4,7 +4,7 @@
 본 코드의 특징은 다음과 같습니다.
 * This code is from (https://github.com/Crystalsound/FRN)
 * 음성 명료도 저하 극복을 위한 대역폭 확장 BWE 알고리즘 딥러닝 모델 FRN을 baseline으로 선정
-* Continual Learning Approach for Speech Super-resolution (CLASS) 적용을 통한 모델 성능 고도화 .
+* Continual Learning Approach for Speech Super-resolution (CLASS) 적용을 통한 모델 성능 고도화 
 
 ## 1. Setup 
 자세한 환경 설치 방법은 위 링크 참고
