@@ -1,12 +1,10 @@
 # Bandwidth extension (BWE)
-본 코드는 2021년도 과학기술통신부의 재원으로 정보통신기획평가원(IITP)의 지원을 받아 수행한 "원격다자간 영상회의에서의 음성 품질 고도화 기술개발" 과제의 일환으로 공개된 명료도 향상 부문의 2차년도 코드입니다. 
+본 코드는 2021년도 과학기술통신부의 재원으로 정보통신기획평가원(IITP)의 지원을 받아 수행한 "원격다자간 영상회의에서의 음성 품질 고도화 기술개발" 과제의 일환으로 공개된 명료도 향상 부문의 3차년도 코드입니다. 
 
 본 코드의 특징은 다음과 같습니다.
-* This code is from https://github.com/NXTProduct/TUNet
-* 음성 명료도 저하 극복을 위한 대역폭 확장 BWE 알고리즘 딥러닝 모델 TUNet을 baseline으로 선정
-* 본 과제의 목적인 실시간성에 맞춰서 기존의 convolution을 causal convolution으로 대체하여 TUNet_realtime으로 모델 변경
-* Attention mechanism을 사용하는 AFiLM을 추가하여 TUNet_realtime_ATAFiLM 모델 구조 고도화 
-* 사전학습 Pretraining을 통하여 성능향상 도모
+* This code is from https://github.com/NXTProduct/TUNet](https://github.com/sp-uhh/sgmse
+* 음성 명료도 저하 극복을 위한 대역폭 확장 BWE 알고리즘 딥러닝 모델 SGMSE를 baseline으로 선정
+* Continual Learning Approach for Speech Super-resolution (CLASS) 적용을 통한 모델 성능 고도화 
 
 ## 1. Setup 
 자세한 환경 설치 방법은 위 링크 참고
@@ -18,7 +16,7 @@
 
 To install all required packages via pip command
 ```
-Pip3 install -r tunet_requirments.txt
+Pip3 install -r sgmse_requirments.txt
 ```
 
 ## 2. Prepare dataset
@@ -118,4 +116,4 @@ SINGLE = False
       ```
 
 ## 5. Reference
-* TUNet paper: https://ieeexplore.ieee.org/abstract/document/9747699
+* SGMSE paper: https://ieeexplore.ieee.org/abstract/document/10149431
