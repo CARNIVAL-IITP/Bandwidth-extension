@@ -67,13 +67,7 @@ SITEC DB는 다음과 같은 room환경에서 RIR을 통하여 데이터셋 생�
 ## 3. Training
 
 ### Configuration
-config_foler 폴더에 있는 참조
-* VCTK DB에 TUNet baseline: `VCTK_TUNet.py`
-* VCTK DB에 TUNet_realtime: `VCTK_TUNet_realtime.py`
-* VCTK DB에 TUNet_realtime 모델에 atafilm 적용: `VCTK_TUNet_realtime_atafilm.py`
-* SITEC DB에 TUNet baseline: `SITEC_TUNet.py`
-* SITEC DB에 TUNet_realtime: `SITEC_TUNet_realtime.py`
-* SITEC DB에 TUNet_realtime 모델에 atafilm 적용: `SITEC_TUNet_realtime_atafilm.py`
+config.py 파일 참조
 
 ### To train
 
