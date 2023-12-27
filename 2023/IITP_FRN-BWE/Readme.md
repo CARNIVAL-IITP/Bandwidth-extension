@@ -76,10 +76,7 @@ config.py 파일 참조
     $ python main.py --mode train
     ```
 * To train with pretraining model,
-  Go to FRN_BWE-pretraining folder and Modify LOG.pretrained_encoder_path in `config.py`
-  
-  Modify pretraining task in `config.py` to ['MSM-noisy', 'MSM-clean', 'NAE' ,'NB-BWE+MSM','HB-BWE','PLC']
-  
+* 
   Run `main.py`:
     ```
     $ python main.py --mode train --version {version number of pretrained model}
