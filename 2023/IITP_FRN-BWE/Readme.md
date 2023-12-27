@@ -75,9 +75,7 @@ config.py 파일 참조
     ```
     $ python main.py --mode train
     ```
-* To train with pretraining model,
-* 
-  Run `main.py`:
+* To train with pretraining model, run `main.py` with following argument:
     ```
     $ python main.py --mode train --version {version number of pretrained model}
     ```
