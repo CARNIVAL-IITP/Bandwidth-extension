@@ -66,7 +66,7 @@ SITEC DB는 다음과 같은 room환경에서 RIR을 통하여 데이터셋 생�
 
 ## 3. Training
 
-### Configuration
+### Configuration for training parameters
 config.py 파일 참조
 
 ### To train
@@ -77,7 +77,9 @@ config.py 파일 참조
     ```
 * To train with pretraining model,
   Go to FRN_BWE-pretraining folder and Modify LOG.pretrained_encoder_path in `config.py`
-  Modify pretraining task in  `config.py` to ['MSM-noisy', 'MSM-clean', 'NAE' ,'NB-BWE+MSM','HB-BWE','PLC']
+  
+  Modify pretraining task in `config.py` to ['MSM-noisy', 'MSM-clean', 'NAE' ,'NB-BWE+MSM','HB-BWE','PLC']
+  
   Run `main.py`:
     ```
     $ python main.py --mode train --version {version number of pretrained model}
