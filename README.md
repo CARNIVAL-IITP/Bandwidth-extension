@@ -3,3 +3,7 @@
 
 
 현재 본 코드는 2021(1년차), 2022(2년차), 그리고 2023(3년차) 폴더로 구분되어 있습니다.
+
+This is the official repo of the manuscript "Progressive Subband Modeling for Artifacts-free Speech Super-resolution", which is submitted to ICASSP 2025.
+
+The code and demo samples will be available soon.
