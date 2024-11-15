@@ -1,0 +1,30 @@
+# @package biencoder
+
+num_workers: 4
+max_epochs: -1
+
+train_batch_size: 15
+val_batch_size: 15
+index_batch_size: 2000
+test_batch_size: 15
+
+max_grad_norm: 1.0
+
+adam_eps: 1e-8
+adam_betas: (0.9, 0.999)
+learning_rate: 1e-5
+weight_decay: 0.0
+warmup_steps: 100
+
+sequence_length: 100
+dropout: 0.1
+
+## model config
+model_name: TUNet-baseline
+tfilm: True  # enable/disable TFiLM layers
+n_blocks: 64  # number of blocks of TFiLM layers.
+bottleneck_type: 'performer'  # bottleneck module. Should either be 'performer', 'lstm' or None
+kernel_sizes: [66, 18, 8]  # kernel sizes of each convolution/deconvolution layers
+strides: [4, 4, 4]  # strides of each convolution/deconvolution layers
+out_channels: [64, 128, 256]  # numbers of filters of each convolution/deconvolution layers
+
