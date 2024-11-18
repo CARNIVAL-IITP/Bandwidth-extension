@@ -12,8 +12,9 @@ from config import CONFIG
 from dataset import TrainDataset, TestLoader, BlindTestLoader
 
 from models.frn import PLCModel, OnnxWrapper
-from models.ftn_film import FRN_PLUS
-from models.frn_continual import ContinualFRN
+from models.frn_subband import FRN_Subband
+from models.frn_subband_pcl import FRN_Subband_pcl
+# from models.frn_encoder_only import PLCModel
 
 from utils.tblogger import TensorBoardLoggerExpanded
 from utils.utils import mkdir_p
@@ -33,10 +34,10 @@ assert args.mode in ['train', 'eval', 'test', 'onnx'], "--mode should be 'train'
 
 def resume(train_dataset, val_dataset, version):
     print("Version", version)
-    if CONFIG.TRAIN.pretraining:
-        model_path = os.path.join('FRN_BWE-pretraining/', CONFIG.LOG.log_dir, 'version_{}/checkpoints/'.format(str(version)))
-    else: 
-        model_path = os.path.join(CONFIG.LOG.log_dir, 'version_{}/checkpoints/'.format(str(version)))
+    # if CONFIG.TRAIN.pretraining:
+        # model_path = os.path.join('FRN_BWE-pretraining/', CONFIG.LOG.log_dir, 'version_{}/checkpoints/'.format(str(version)))
+    # else: 
+    model_path = os.path.join(CONFIG.LOG.log_dir, 'version_{}/checkpoints/'.format(str(version)))
     hparams_path = os.path.join(CONFIG.LOG.log_dir, 'version_{}/'.format(str(version)) + 'hparams.yaml')
     model_name = [x for x in os.listdir(model_path) if x.endswith(".ckpt")][0]
     ckpt_path = model_path + model_name
@@ -57,7 +58,7 @@ def resume(train_dataset, val_dataset, version):
                                                 version=version,
                                                 save=CONFIG.TEST.save,
                                                 window_size=CONFIG.DATA.window_size)
-    elif CONFIG.MODEL.model_name == 'FRN-continual-baseline':
+    elif CONFIG.MODEL.model_name == 'FRN-baseline-continual':
         checkpoint = ContinualFRN.load_from_checkpoint(ckpt_path,
                                                 strict=False,
                                                 train_dataset=train_dataset,
@@ -65,6 +66,31 @@ def resume(train_dataset, val_dataset, version):
                                                 version=version,
                                                 save=CONFIG.TEST.save,
                                                 window_size=CONFIG.DATA.window_size)
+    elif CONFIG.MODEL.model_name == 'FRN-subband':
+        checkpoint = FRN_Subband.load_from_checkpoint(ckpt_path,
+                                                strict=True,
+                                                train_dataset=train_dataset,
+                                                val_dataset=val_dataset,
+                                                version=version,
+                                                save=CONFIG.TEST.save,
+                                                window_size=CONFIG.DATA.window_size)
+        
+    elif CONFIG.MODEL.model_name == 'FRN-subband-pcl':
+        checkpoint = FRN_Subband_pcl.load_from_checkpoint(ckpt_path,
+                                                strict=True,
+                                                train_dataset=train_dataset,
+                                                val_dataset=val_dataset,
+                                                version=version,
+                                                save=CONFIG.TEST.save,
+                                                window_size=CONFIG.DATA.window_size)     
+    else:
+        checkpoint = PLCModel.load_from_checkpoint(ckpt_path,
+                                               strict=True,
+                                               train_dataset=train_dataset,
+                                               val_dataset=val_dataset,
+                                               version=version,
+                                               save=CONFIG.TEST.save,
+                                               window_size=CONFIG.DATA.window_size)
     return checkpoint
 
 
@@ -87,11 +113,18 @@ def train():
     elif CONFIG.MODEL.model_name == 'FRN-encoder':
         model = PLCModel(train_dataset,
                         val_dataset)
-                
+    elif CONFIG.MODEL.model_name == 'FRN-baseline-continual':
+        model = ContinualFRN(train_dataset,
+                        val_dataset)
+    elif CONFIG.MODEL.model_name == 'FRN-subband':
+        model = FRN_Subband(train_dataset,
+                        val_dataset)
+    elif CONFIG.MODEL.model_name == 'FRN-subband-pcl':
+        model = FRN_Subband_pcl(train_dataset,
+                        val_dataset)
+        
     trainer = pl.Trainer(accelerator="gpu", 
                          devices = [0],
-                        #  devices = [1],
-                        #  devices = [0, 1],
                          logger=logger,
                          gradient_clip_val=CONFIG.TRAIN.clipping_val,
                          max_epochs=CONFIG.TRAIN.epochs,
@@ -137,10 +170,12 @@ if __name__ == '__main__':
             testset = TestLoader()
             test_loader = DataLoader(testset, batch_size=1, num_workers=8)
             metrics = trainer.test(model, test_loader)
+            # print(inference_time)
+            # exit()
             current_path = os.path.abspath(os.getcwd())
             result_path = current_path + '/result/' + CONFIG.DATA.dataset + '/'
             os.makedirs(result_path, exist_ok = True)
-            txt_name = result_path + CONFIG.DATA.dataset +'_'+CONFIG.MODEL.model_name+'_linux2_version' + str(args.version) + '_' + CONFIG.TASK.task +'_result.txt'             
+            txt_name = result_path + CONFIG.DATA.dataset +'_'+CONFIG.MODEL.model_name+'_linux1_version' + str(args.version) + '_' + CONFIG.TASK.task +'_result.txt'             
             file = open(txt_name, "w")
             file.write(str(metrics))
             exit()

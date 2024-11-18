@@ -187,6 +187,10 @@ class BlindTestLoader(Dataset):
 
     def __getitem__(self, index):
         sig = load_audio(self.data_list[index], sample_rate=self.sr)
+        # duration = librosa.get_duration(y=sig, sr=self.sr)
+        # print("Times to duration of audio file: (s)", duration)
+        # print(duration)
+
         sig = torch.from_numpy(sig).squeeze(0)
         sig = torch.stft(sig, self.chunk_len, self.stride, window=self.hann, 
                          return_complex=True)
@@ -207,12 +211,12 @@ class TrainDataset(Dataset):
             if mode == 'train':
                 txt_list = CONFIG.DATA.data_dir[dataset_name]['train']
                 self.data_list = self.load_txt(txt_list)
-                self.data_list, _ = train_test_split(self.data_list, test_size=CONFIG.TRAIN.val_split, random_state=0)
+                # self.data_list, _ = train_test_split(self.data_list, test_size=CONFIG.TRAIN.val_split, random_state=0)
 
             elif mode == 'val':
                 txt_list = CONFIG.DATA.data_dir[dataset_name]['val']
                 self.data_list = self.load_txt(txt_list)
-                _, self.data_list = train_test_split(self.data_list, test_size=CONFIG.TRAIN.val_split, random_state=0)
+                # _, self.data_list = train_test_split(self.data_list, test_size=CONFIG.TRAIN.val_split, random_state=0)
 
         else:
             if mode == 'train':
@@ -274,8 +278,21 @@ class TrainDataset(Dataset):
 
     def __getitem__(self, index):
         sig = self.fetch_audio(index)
+        # print('0',sig.shape) #0 (1, 40960)
+
         sig = sig.reshape(-1).astype(float)
+        # print('1', sig.shape) # 1 (40960,)
         target = torch.tensor(sig.copy())
+        # p_size = random.choice(self.p_sizes)
+
+        # sig = np.reshape(sig, (-1, p_size))
+        # print('2', sig.shape) #2 (512, 80)
+        if self.task == 'PLC':
+            mask = self.mask_generator.gen_mask(len(sig), seed=index)[:, np.newaxis]
+            sig *= mask
+            sig = np.reshape(sig, -1) # add
+            sig = torch.tensor(sig.copy())
+        # print('3', sig.shape, target.shape) # 3 torch.Size([40960]) torch.Size([40960])
 
         if self.task == 'HB-BWE':
             low_sig = self.lowpass(sig)
@@ -332,5 +349,7 @@ class TrainDataset(Dataset):
         low_sig = torch.stft(low_sig, self.chunk_len, self.stride, window=self.hann, 
                              return_complex=True)
         low_sig = torch.view_as_real(low_sig).permute(2, 0, 1).float()
+        # print('4', low_sig.shape, target.shape) #4 torch.Size([2, 161, 257]) torch.Size([2, 161, 257])
+
         return low_sig, target
 

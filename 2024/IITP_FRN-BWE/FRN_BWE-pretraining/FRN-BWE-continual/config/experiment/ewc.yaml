@@ -1,9 +1,0 @@
-name: ewc_0.1
-strategy: ewc
-base_size: 15_000
-cl_sizes:
-  - 5_000
-  - 10_000
-  - 15_000
-  - 20_000
-  - 25_000

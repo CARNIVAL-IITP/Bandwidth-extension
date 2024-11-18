@@ -19,7 +19,9 @@ from models.blocks_PLUS import Encoder_PLUS, Predictor_PLUS, RI_Predictor
 from natsort import natsorted
 from os import makedirs
 
-import time
+from loss import MRSTFTLossDDP_custom, MultiScaleSubbandSTFTLoss
+from torchsubband import SubbandDSP
+
 
 # plcmos = PLCMOSEstimator()
 
@@ -33,11 +35,11 @@ def load_txt(target_root, txt_list):
     return target
 
 
-class PLCModel(pl.LightningModule):
+class FRN_Subband(pl.LightningModule):
     def __init__(self, train_dataset = None, val_dataset = None, 
                  pred_ckpt_path = None, version = None, save = None):
                 #  pred_ckpt_path='lightning_logs/predictor/checkpoints/predictor.ckpt', version = None, save = None):
-        super(PLCModel, self).__init__()
+        super(FRN_Subband, self).__init__()
 
         self.window_size = CONFIG.DATA.window_size 
         self.enc_lstm_type = CONFIG.MODEL.enc_lstm_tpye
@@ -74,6 +76,17 @@ class PLCModel(pl.LightningModule):
         self.hparams['mode_name'] = CONFIG.MODEL.model_name
         self.hparams['task'] = CONFIG.TASK.task
         self.save_hyperparameters(ignore=['train_dataset', 'val_dataset'])
+
+        if CONFIG.TRAIN.subband.subband_training == True:
+            self.subband = SubbandDSP(subband=CONFIG.TRAIN.subband.subband)
+            self.stft_loss = MRSTFTLossDDP_custom(n_bins=64, sample_rate=CONFIG.DATA.sr, device="cpu", scale='mel')
+            # self.stft_loss = Loss()
+            self.subband_stft_loss = MultiScaleSubbandSTFTLoss()
+            self.subband_weigh_stft_loss = CONFIG.TRAIN.subband.weight_loss
+            self.hparams['subband_training'] = CONFIG.TRAIN.subband.subband_training
+            self.hparams['subband'] = CONFIG.TRAIN.subband.subband
+            self.hparams['subband_weight_loss'] = CONFIG.TRAIN.subband.weight_loss
+
 
         if pred_ckpt_path is not None:
             self.predictor = Predictor.load_from_checkpoint(pred_ckpt_path)
@@ -150,6 +163,42 @@ class PLCModel(pl.LightningModule):
                           num_workers=CONFIG.TRAIN.workers, 
                           pin_memory = True, persistent_workers=True)
 
+    def forward_loss(self, x, y):
+        if self.hparams.loss_type == 1:
+            loss = self.loss(x, y)
+        elif self.hparams.loss_type ==2:
+            loss = self.stft_loss(x, y) + self.loss(x, y) * CONFIG.TRAIN.mse_weight
+        elif self.hparams.loss_type ==3:
+
+            x_sub = self.subband.wav_to_sub(x)
+            y_sub = self.subband.wav_to_sub(y)
+   
+            subband_loss_weight = CONFIG.TRAIN.subband.weight_loss
+            subband_stft_loss_mg, subband_stft_loss_sc = self.subband_stft_loss(x_sub, y_sub)
+            subband_loss = subband_loss_weight * (subband_stft_loss_mg + subband_stft_loss_sc)
+            
+            time_loss = self.loss(x, y) * CONFIG.TRAIN.mse_weight
+            stft_loss = self.stft_loss(x, y) * CONFIG.TRAIN.stft_weight
+
+            self.log('train_time_loss', stft_loss, logger=True)
+            self.log('train_freq_loss', time_loss, logger=True)
+            self.log('train_subband_loss', subband_loss, logger=True)
+
+            loss = time_loss + stft_loss + subband_loss
+
+        elif self.hparams.regularizer == 'L2' :
+            l2_reg = torch.tensor(0.)#.to(device=device)
+            for param in self.parameters():
+                new_param = param.to(l2_reg)
+                l2_reg += torch.norm(new_param)
+            loss = self.freq_loss(x, y) + self.time_loss(x, y) \
+                * CONFIG.TRAIN.mse_weight + self.hparams.lambda_reg * l2_reg
+        else:
+            l1_norm = sum([p.abs().sum() for p in self.parameters()])
+            loss = self.freq_loss(x, y) + self.time_loss(x, y) \
+                * CONFIG.TRAIN.mse_weight + self.hparams.lambda_reg * l1_norm
+        return loss
+    
     def training_step(self, batch, batch_idx):
         x_in, y = batch
         f_0 = x_in[:, :, 0:1, :]
@@ -186,43 +235,6 @@ class PLCModel(pl.LightningModule):
 
             self.trainer.logger.log_spectrogram(y[i], x, pred[i], self.current_epoch)
             self.trainer.logger.log_audio(y[i], x, pred[i], self.current_epoch)
-
-    # def training_step(self, batch, batch_idx):
-    #     x_in, y = batch
-    #     # f_0 = x_in[:, :, 0:1, :]
-    #     # x = x_in[:, :, 1:, :]
-
-    #     x = self(x)
-    #     # x = torch.cat([f_0, x], dim=2)
-
-    #     loss = self.loss(x, y)
-    #     self.log('train_loss', loss, logger=True)
-    #     return loss
-
-    # def validation_step(self, val_batch, batch_idx):
-    #     x, y = val_batch
-    #     # f_0 = x[:, :, 0:1, :]
-    #     # x_in = x[:, :, 1:, :]
-
-    #     pred = self(x)
-    #     # pred = torch.cat([f_0, pred], dim=2)
-
-    #     loss = self.loss(pred, y)
-    #     self.window = self.window.to(pred.device)
-    #     pred = torch.view_as_complex(pred.permute(0, 2, 3, 1).contiguous())
-    #     pred = torch.istft(pred, self.window_size, self.hop_size, window=self.window)
-    #     y = torch.view_as_complex(y.permute(0, 2, 3, 1).contiguous())
-    #     y = torch.istft(y, self.window_size, self.hop_size, window=self.window)
-
-    #     self.log('val_loss', loss, on_step=False, on_epoch=True, logger=True, prog_bar=True, sync_dist=True)
-
-    #     if batch_idx == 0:
-    #         i = torch.randint(0, x.shape[0], (1,)).item()
-    #         x = torch.view_as_complex(x.permute(0, 2, 3, 1).contiguous())
-    #         x = torch.istft(x[i], self.window_size, self.hop_size, window=self.window)
-
-    #         self.trainer.logger.log_spectrogram(y[i], x, pred[i], self.current_epoch)
-    #         self.trainer.logger.log_audio(y[i], x, pred[i], self.current_epoch)
 
     def test_step(self, test_batch, batch_idx):
         inp, tar, inp_wav, tar_wav = test_batch
@@ -280,24 +292,10 @@ class PLCModel(pl.LightningModule):
     def predict_step(self, batch, batch_idx: int, dataloader_idx: int = 0):
         f_0 = batch[:, :, 0:1, :]
         x = batch[:, :, 1:, :]
-
-        start = time.perf_counter()
         pred = self(x)
-        end = time.perf_counter()
-
-        inference_time = end-start
-
         pred = torch.cat([f_0, pred], dim=2)
-        pred = torch.view_as_complex(pred.permute(0, 2, 3, 1).contiguous()).squeeze(0)
-        pred = torch.istft(pred, self.window_size, self.hop_size,
+        pred = torch.istft(pred.squeeze(0).permute(1, 2, 0), self.window_size, self.hop_size,
                            window=self.window.to(pred.device))
-        
-        duration = librosa.get_duration(y=pred, sr=16000)
-        # RTF = np.divide(elasped, duration)
-        print(f"Total time to compute to enhance: {inference_time} (s)")
-        print(f"Total duration of audio samples: {duration} (s)")
-        print(f"RTF: {inference_time/duration}")
-        # exit()
         return pred
 
     def configure_optimizers(self):

@@ -111,6 +111,34 @@ def mkdir_p(mypath):
         else:
             raise
 
+
+# def visualize(hr, lr, recon, path):
+#     sr = CONFIG.DATA.sr
+#     window_size = 1024
+#     window = np.hanning(window_size)
+
+#     stft_hr = librosa.core.spectrum.stft(hr, n_fft=window_size, hop_length=512, window=window)
+#     stft_hr = 2 * np.abs(stft_hr) / np.sum(window)
+
+#     stft_lr = librosa.core.spectrum.stft(lr, n_fft=window_size, hop_length=512, window=window)
+#     stft_lr = 2 * np.abs(stft_lr) / np.sum(window)
+
+#     stft_recon = librosa.core.spectrum.stft(recon, n_fft=window_size, hop_length=512, window=window)
+#     stft_recon = 2 * np.abs(stft_recon) / np.sum(window)
+
+#     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharey=True, sharex=True, figsize=(16, 10))
+#     ax1.title.set_text('HR signal')
+#     ax2.title.set_text('LR signal')
+#     ax3.title.set_text('Reconstructed signal')
+
+#     canvas = FigureCanvas(fig)
+#     p = librosa.display.specshow(librosa.amplitude_to_db(stft_hr), ax=ax1, y_axis='linear', x_axis='time', sr=sr)
+#     p = librosa.display.specshow(librosa.amplitude_to_db(stft_lr), ax=ax2, y_axis='linear', x_axis='time', sr=sr)
+#     p = librosa.display.specshow(librosa.amplitude_to_db(stft_recon), ax=ax3, y_axis='linear', x_axis='time', sr=sr)
+#     mkdir_p(path)
+#     fig.savefig(os.path.join(path, 'spec.png'))
+
+
 def SNR(x, ref):
     # Signal-to-noise ratio
     ref_pow = (ref**2).mean().mean() + np.finfo('float32').eps

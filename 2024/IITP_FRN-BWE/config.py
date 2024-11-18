@@ -27,7 +27,7 @@ class CONFIG:
         ripples = [0.05]#[1e-9, 1e-6, 1e-3, 1, 5]  # the Chebyshev Type-I ripples
 
     class TRAIN:
-        batch_size = 16  # number of audio files per batch
+        batch_size = 64  # number of audio files per batch
         lr = 1e-4  # learning rate
         epochs = 100  # max training epochs
         workers = 16  # number of dataloader workers
@@ -37,51 +37,105 @@ class CONFIG:
         factor = 0.5  # learning rate reduction factor
         pretraining = False
 
+        # loss_type = 3  # training loss types. 1: MSE loss, 2: MSE and multi-resolution STFT loss
+        # assert loss_type in [1, 2, 3, 4, 5], '1: time only, 2: time + stft, 3: time + stft + subband'
+        # mse_weight = 10000  # weight of the MSE loss
+        # stft_weight = 1  # weight of the MSE loss
+        
+        # class subband:
+        #     subband_training = True
+        #     subband = 8
+        #     weight_loss = 1
+
+        class subband:
+            subband_training = True
+            subband = 1
+            weight_loss_1 = 1
+            weight_loss_2 = 0
+            weight_loss_4 = 0
+            weight_loss_8 = 0
+
+        # class pretraining:
+        #     strategy = 'none'
+        #     regularizer_mode = False
+        #     regularizer = 'none'
+        #     lambda_reg = 0.001
+        #     ewc_mode = False
+        #     ewc_lambda = 0.0001
+        #     ema_mode = False
+        #     ema_decay = 0.9999
+        #     gem_mode = False
+        #     memory_strength = 0.00001
+        #     lr0 = 3e-4
+        #     num_prior_training = 1 
+
+
+    # # Model config
+    # class MODEL:
+    #     model_name = 'FRN-continual-baseline'
+    #     assert model_name in ['FRN-baseline', 'FRN-FiLM', 'FRN-encoder', 'FRN-continual-baseline']
+    #     state = True
+    #     enc_lstm_tpye = 'LT-LSTM'
+    #     assert enc_lstm_tpye in ['LSTM', 'LT-LSTM', 'GRU']
+    #     enc_layers = 4  # number of MLP blocks in the encoder
+    #     enc_in_dim = 384  # dimension of the input projection layer in the encoder
+    #     enc_dim = 768  # dimension of the MLP blocks
+    #     pred_lstm_tpye = 'LT-LSTM'
+    #     assert pred_lstm_tpye in ['LSTM', 'LT-LSTM', 'GRU']
+    #     pred_dim = 512  # dimension of the LSTM in the predictor
+    #     pred_layers = 1  # number of LSTM layers in the predictor
+
     # Model config
     class MODEL:
-        model_name = 'FRN-continual-baseline'
-        assert model_name in ['FRN-baseline', 'FRN-FiLM', 'FRN-encoder', 'FRN-continual-baseline']
-        state = True
-        enc_lstm_tpye = 'LT-LSTM'
+        model_name = 'FRN-subband-pcl'
+        # model_name = 'FRN-baseline'
+        # model_name = 'FRN-baseline-continual'
+        # model_name = 'FRN-subband'
+        assert model_name in ['FRN-baseline', 'FRN-FiLM', 'FRN-encoder', 'FRN-baseline-continual', 'FRN-subband', 'FRN-subband-pcl']
+        enc_state = True
+        pred_state = True
+        enc_lstm_tpye = 'LSTM'
         assert enc_lstm_tpye in ['LSTM', 'LT-LSTM', 'GRU']
         enc_layers = 4  # number of MLP blocks in the encoder
         enc_in_dim = 384  # dimension of the input projection layer in the encoder
         enc_dim = 768  # dimension of the MLP blocks
-        pred_lstm_tpye = 'LT-LSTM'
+        pred_lstm_tpye = 'LSTM'
         assert pred_lstm_tpye in ['LSTM', 'LT-LSTM', 'GRU']
         pred_dim = 512  # dimension of the LSTM in the predictor
         pred_layers = 1  # number of LSTM layers in the predictor
 
+
     # Dataset config
     class DATA:
-        dataset = 'vctk-0.92-multi'  # dataset to use. Should either be 'vctk' or 'vivos'
+        dataset = 'sitec-rir-each'  # dataset to use. Should either be 'vctk' or 'vivos'
         '''
         Dictionary that specifies paths to root directories and train/test text files of each datasets.
         'root' is the path to the dataset and each line of the train.txt/test.txt files should contains the path to an
         audio file from 'root'. 
         '''
-        data_dir = {'timit': {'root': '/home/dh2/Research/TUNet/data/TIMIT',
-                             'train': '/home/dh2/Research/TUNet/data/TIMIT/train.txt',
-                             'test': '/home/dh2/Research/TUNet/data/TIMIT/test.txt'},
-                    'vctk-0.92-multi': {'root': '/home/dh2/Research/TUNet/data/vctk-0.92',
-                             'train': "/home/dh2/Research/TUNet/data/vctk-0.92/vctk-0.92-multi_train_wavs.txt",
-                             'test': "/home/dh2/Research/TUNet/data/vctk-0.92/vctk-0.92-multi_test_wavs.txt"},
-                    'vctk-0.92-single': {'root': '/home/dh2/Research/TUNet/data/vctk-0.92',
-                             'train': "/home/dh2/Research/TUNet/data/vctk-0.92/vctk-0.92-single_train_wavs.txt",
-                             'test': "/home/dh2/Research/TUNet/data/vctk-0.92/vctk-0.92-single_test_wavs.txt"},
-                    'vctk-0.80-multi': {'root': '/home/dh2/Research/TUNet/data/vctk/wav48',
-                             'train': "/home/dh2/Research/TUNet/data/vctk-0.80/train.txt",
-                             'test': "/home/dh2/Research/TUNet/data/vctk-0.80/test.txt"},
-                    'sitec-rir-each': {'root': '/home/dh2/Research/TUNet/data/sitec_rir',
-                             'train': "/home/dh2/Research/TUNet/data/sitec_rir/sitec_rir_each_tr.txt",
-                             'test': "/home/dh2/Research/TUNet/data/sitec_rir/sitec_rir_each_test.txt"},
-                    'plc-challenge': {'root': '/home/dh2/Research/TUNet/data/plc-challenge',
-                            'train_clean': "/home/dh2/Research/TUNet/data/plc-challenge/train_clean.txt",
-                            'train_noisy': "/home/dh2/Research/TUNet/data/plc-challenge/train_noisy.txt",
-                            'val_clean': "/home/dh2/Research/TUNet/data/plc-challenge/val_clean.txt",
-                            'val_noisy': "/home/dh2/Research/TUNet/data/plc-challenge/val_noisy.txt",
-                            'test_clean': "/home/dh2/Research/TUNet/data/plc-challenge/test_clean.txt",
-                            'test_noisy': "/home/dh2/Research/TUNet/data/plc-challenge/test_noisy.txt"}
+        data_dir = {'timit': {'root': '/media/dh2/Datasets_linux1/TUNet_dataset/TIMIT',
+                             'train': '/media/dh2/Datasets_linux1/TUNet_dataset/TIMIT/train.txt',
+                             'test': '/media/dh2/Datasets_linux1/TUNet_dataset/TIMIT/test.txt'},
+                    'vctk-0.92-multi': {'root': '/media/dh2/Datasets_linux1/TUNet_dataset/vctk-0.92',
+                             'train': "/media/dh2/Datasets_linux1/TUNet_dataset/vctk-0.92/vctk-0.92-multi_train_wavs.txt",
+                             'test': "/media/dh2/Datasets_linux1/TUNet_dataset/vctk-0.92/vctk-0.92-multi_test_wavs.txt"},
+                    'vctk-0.92-single': {'root': '/media/dh2/Datasets_linux1/TUNet_dataset/vctk-0.92',
+                             'train': "/media/dh2/Datasets_linux1/TUNet_dataset/vctk-0.92/vctk-0.92-single_train_wavs.txt",
+                             'test': "/media/dh2/Datasets_linux1/TUNet_dataset/vctk-0.92/vctk-0.92-single_test_wavs.txt"},
+                    'vctk-0.80-multi': {'root': '/media/dh2/Datasets_linux1/TUNet_dataset/vctk/wav48',
+                             'train': "/media/dh2/Datasets_linux1/TUNet_dataset/vctk-0.80/train.txt",
+                             'test': "/media/dh2/Datasets_linux1/TUNet_dataset/vctk-0.80/test.txt"},
+                    'sitec-rir-each': {'root': '/media/dh2/Datasets_linux1/TUNet_dataset/sitec_rir',
+                             'train': "/media/dh2/Datasets_linux1/TUNet_dataset/sitec_rir/sitec_rir_each_tr.txt",
+                             'val': "/media/dh2/Datasets_linux1/TUNet_dataset/sitec_rir/sitec_rir_each_val.txt",
+                             'test': "/media/dh2/Datasets_linux1/TUNet_dataset/sitec_rir/sitec_rir_each_test.txt"},
+                    'plc-challenge': {'root': '/media/dh2/Datasets_linux1/TUNet_dataset/plc-challenge',
+                            'train_clean': "/media/dh2/Datasets_linux1/TUNet_dataset/plc-challenge/train_clean.txt",
+                            'train_noisy': "/media/dh2/Datasets_linux1/TUNet_dataset/plc-challenge/train_noisy.txt",
+                            'val_clean': "/media/dh2/Datasets_linux1/TUNet_dataset/plc-challenge/val_clean.txt",
+                            'val_noisy': "/media/dh2/Datasets_linux1/TUNet_dataset/plc-challenge/val_noisy.txt",
+                            'test_clean': "/media/dh2/Datasets_linux1/TUNet_dataset/plc-challenge/test_clean.txt",
+                            'test_noisy': "/media/dh2/Datasets_linux1/TUNet_dataset/plc-challenge/test_noisy.txt"}
                     }
         sr = 16000  # audio sampling rate
         audio_chunk_len = 40960  # size of chunk taken in each audio files
@@ -106,6 +160,6 @@ class CONFIG:
         sample_path = 'audio_samples'  # path to save generated audio samples in evaluation.
 
     class TEST:
-        in_dir = '/home/dh2/Project/IITP/STOI/clean'  # path to test audio inputs
-        out_dir = '/home/dh2/Project/IITP/STOI/clean-proposed_FRN-CLASS'  # path to generated outputs
+        in_dir = '/home/dh2/Project/IITP/2023/STOI/noisy'  # path to test audio inputs
+        out_dir = '/home/dh2/Project/IITP/2023/STOI/proposed_FRN-subband-pcl/'  # path to generated outputs
         save = True
