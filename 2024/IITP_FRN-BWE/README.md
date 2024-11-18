@@ -1,82 +1,30 @@
-# FRN - Full-band Recurrent Network Official Implementation
+# Bandwidth extension (BWE)
+본 코드는 2024년도 과학기술통신부의 재원으로 정보통신기획평가원(IITP)의 지원을 받아 수행한 "원격다자간 영상회의에서의 음성 품질 고도화 기술개발" 과제의 일환으로 공개된 명료도 향상 부문의 4차년도 코드입니다. 
 
-**Improving performance of real-time full-band blind packet-loss concealment with predictive network - ICASSP 2023**
+본 코드의 특징은 다음과 같습니다.
+* This code is from (https://github.com/Crystalsound/FRN)
+* 음성 명료도 저하 극복을 위한 대역폭 확장 BWE 알고리즘 딥러닝 모델 FRN을 baseline으로 선정
+* Subband loss 적용을 통한 모델 성능 고도화 
 
-[![Generic badge](https://img.shields.io/badge/arXiv-2211.04071-brightgreen.svg?style=flat-square)](https://arxiv.org/abs/2211.04071)
-[![Generic badge](https://img.shields.io/github/stars/Crystalsound/FRN?color=yellow&label=FRN&logo=github&style=flat-square)](https://github.com/Crystalsound/FRN/)
-[![Generic badge](https://img.shields.io/badge/GitHub.io-Audio_Samples-blue?color=blue&label=GitHub.io&style=flat-square)](https://crystalsound.github.io/FRN/)
-[![Generic badge](https://img.shields.io/badge/Demo-HuggingFace-yellow?color=yellow&label=Demo&style=flat-square)](https://huggingface.co/spaces/anhnv125/FRN)
+## 1. Setup 
+자세한 환경 설치 방법은 위 링크 참고
 
-## License and citation
+### Requirements
+* PyTorch
+* Numpy
+* h5py
 
-This repository is released under the CC-BY-NC 4.0. license as found in the LICENSE file.
-
-If you use our software, please cite as below.
-For future queries, please contact [anh.nguyen@namitech.io](mailto:anh.nguyen@namitech.io).
-
-Copyright © 2022 NAMI TECHNOLOGY JSC, Inc. All rights reserved.
-
+To install all required packages via pip command
 ```
-@misc{Nguyen2022ImprovingPO,
-  title={Improving performance of real-time full-band blind packet-loss concealment with predictive network},
-  author={Viet-Anh Nguyen and Anh H. T. Nguyen and Andy W. H. Khong},
-  year={2022},
-  eprint={2211.04071},
-  archivePrefix={arXiv},
-  primaryClass={cs.LG}
-}
+Pip3 install -r frn_requirments.txt
 ```
 
-# 1. Results
+## 2. Prepare dataset
 
-Our model achieved a significant gain over baselines. Here, we include the predicted packet loss concealment
-mean-opinion-score (PLCMOS) using Microsoft's [PLCMOS](https://github.com/microsoft/PLC-Challenge/tree/main/PLCMOS)
-service. Please refer to our paper for more benchmarks.
+영어 음성 VCTK DB 및 한국어 음성 SITEC DB 사용
+SITEC DB는 다음과 같은 room환경에서 RIR을 통하여 데이터셋 생성
 
-| Model   | PLCMOS    | 
-|---------|-----------|
-| Input   | 3.517     | 
-| tPLC    | 3.463     | 
-| TFGAN   | 3.645     | 
-| **FRN** | **3.655** |
-
-We also provide several audio samples for
-comparison at [github.io](https://crystalsound.github.io/FRN/), and a demo application at [HuggingFace Space](https://huggingface.co/spaces/anhnv125/FRN).
-
-# 2. Installation
-
-## Setup
-
-### Clone the repo
-
-```
-$ git clone https://github.com/Crystalsound/FRN.git
-$ cd FRN
-```
-
-### Install dependencies
-
-* Our implementation requires the `libsndfile` libraries for the Python packages `soundfile`. On Ubuntu, they can be
-  easily installed using `apt-get`:
-    ```
-    $ apt-get update && apt-get install libsndfile-dev
-    ```
-* Create a Python 3.8 environment. Conda is recommended:
-   ```
-   $ conda create -n frn python=3.8
-   $ conda activate frn
-   ```
-
-* Install the requirements:
-    ```
-    $ pip install -r requirements.txt 
-    ```
-
-# 3. Data preparation
-
-In our paper, we conduct experiments on the [VCTK](https://datashare.ed.ac.uk/handle/10283/3443) dataset.
-
-* Download and extract the datasets:
+* Download and extract the datasets for VCTK:
     ```
     $ wget http://www.udialogue.org/download/VCTK-Corpus.tar.gz -O data/vctk/VCTK-Corpus.tar.gz
     $ tar -zxvf data/vctk/VCTK-Corpus.tar.gz -C data/vctk/ --strip-components=1
@@ -94,92 +42,52 @@ In our paper, we conduct experiments on the [VCTK](https://datashare.ed.ac.uk/ha
                     ...
             |--train.txt   
             |--test.txt
+        |--sitec
+            |--train
+                |--waves
+                    |--111
+                        |--1110000019272_v_111.wav
+                        ...                
+            |--val
+                |--waves
+                    |--111
+                        |--1110000019272_v_111.wav
+                        ...      
+            |--test
+                |--waves
+                    |--111
+                        |--1110000019272_v_111.wav
+                        ...      
+            |--sitec_rir_each_train.txt   
+            |--sitec_rir_each_test.txt
+            |--sitec_rir_each_val.txt
     ```
-* In order to load the datasets, text files that contain training and testing audio paths are required. We have
-  prepared `train.txt` and `test.txt` files in `./data/vctk` directory.
+* In order to load the datasets, text files that contain training and testing audio paths are required.
 
-# 4. Run the code
+## 3. Training
 
-## Configuration
+### Configuration for training parameters
+config.py 파일 참조
 
-`config.py` is the most important file. Here, you can find all the configurations related to experiment setups,
-datasets, models, training, testing, etc. Although the config file has been explained thoroughly, we recommend reading
-our paper to fully understand each parameter.
-
-## Training
-
-* Adjust training hyperparameters in `config.py`. We provide the pretrained predictor in `lightning_logs/predictor` as stated in our paper. The FRN model can be trained entirely from scratch and will work as well. In this case, initiate `PLCModel(..., pred_ckpt_path=None)`.
+### To train
 
 * Run `main.py`:
     ```
     $ python main.py --mode train
     ```
-* Each run will create a version in `./lightning_logs`, where the model checkpoint and hyperparameters are saved. In
-  case you want to continue training from one of these versions, just set the argument `--version` of the above command
-  to your desired version number. For example:
+* To train with pretraining model, run `main.py` with following argument:
     ```
-    # resume from version 0
-    $ python main.py --mode train --version 0
+    $ python main.py --mode train --version {version number of pretrained model}
     ```
-* To monitor the training curves as well as inspect model output visualization, run the tensorboard:
-    ```
-    $ tensorboard --logdir=./lightning_logs --bind_all
-    ```
-  ![image.png](https://images.viblo.asia/eb2246f9-2747-43b9-8f78-d6c154144716.png)
 
-## Evaluation
+## 4. Test
 
-In our paper, we evaluated with 2 masking methods: simulation using Markov Chain and employing real traces in PLC
-Challenge.
+### Audio generation & Evaluation
 
-* Get the blind test set with loss traces:
+* Run `main.py` with a version number to be evaluated
     ```
-    $ wget http://plcchallenge2022pub.blob.core.windows.net/plcchallengearchive/blind.tar.gz
-    $ tar -xvf blind.tar.gz -C test_samples
+    $ python main.py --mode eval --version {version number of trained model}
     ```
-* Modify `config.py` to change evaluation setup if necessary.
-* Run `main.py` with a version number to be evaluated:
-    ```
-    $ python main.py --mode eval --version 0
-    ```
-  During the evaluation, several output samples are saved to `CONFIG.LOG.sample_path` for sanity testing.
 
-## Configure a new dataset
-
-Our implementation currently works with the VCTK dataset but can be easily extensible to a new one.
-
-* Firstly, you need to prepare `train.txt` and `test.txt`. See `./data/vctk/train.txt` and `./data/vctk/test.txt` for
-  example.
-* Secondly, add a new dictionary to `CONFIG.DATA.data_dir`:
-    ```
-    {
-    'root': 'path/to/data/directory',
-    'train': 'path/to/train.txt',
-    'test': 'path/to/test.txt'
-    }
-    ```
-  **Important:** Make sure each line in `train.txt` and `test.txt` joining with `'root'` is a valid path to its
-  corresponding audio file.
-
-# 5. Audio generation
-
-* In order to generate output audios, you need to modify `CONFIG.TEST.in_dir` to your input directory.
-* Run `main.py`:
-    ```
-    python main.py --mode test --version 0
-    ```
-  The generated audios are saved to `CONFIG.TEST.out_dir`.
-
-  ## ONNX inferencing
-  We provide ONNX inferencing scripts and the best ONNX model (converted from the best checkpoint)
-  at `lightning_logs/best_model.onnx`.
-    * Convert a checkpoint to an ONNX model:
-        ```
-        python main.py --mode onnx --version 0
-        ```
-      The converted ONNX model will be saved to `lightning_logs/version_0/checkpoints`.
-    * Put test audios in `test_samples` and inference with the converted ONNX model (see `inference_onnx.py` for more
-      details):
-         ```
-        python inference_onnx.py --onnx_path lightning_logs/version_0/frn.onnx
-        ```
+## 5. Reference
+* FRN paper: https://ieeexplore.ieee.org/document/10097132
