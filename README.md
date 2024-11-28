@@ -8,4 +8,4 @@
 # ICASSP2025 Paper
 This is also the official repo of the manuscript "Progressive Subband Modeling for Artifacts-free Speech Super-resolution", which is submitted to ICASSP 2025.
 
-The code and demo samples will be available soon.
+The code and demo samples are under "ICASSP2025" folder.
