@@ -19,7 +19,7 @@ Pip3 install -r tunet_requirments.txt
 
 ## 2. Prepare dataset
 
-English Speech TIMIT & VCTK DB 사용
+English Speech TIMIT & VCTK DB 
 
 * Download and extract the datasets for VCTK:
     ```
