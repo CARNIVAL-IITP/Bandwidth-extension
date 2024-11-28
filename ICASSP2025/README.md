@@ -1,8 +1,10 @@
 # Bandwidth extension (BWE)
 This code is for "Subband Modeling for Artifacts-free Speech Super-resolution" which is subbmitted to ICASSP 2025.
 
-We have provided the traning code and inference code for reproducibility.
-In addition, we have provided demo samples under "samples" folder.
+* We have provided the traning code and inference code for reproducibility.
+* In addition, we have provided demo samples under "samples" folder.
+
+* This code is from https://github.com/NXTProduct/TUNet
 
 ## 1. Setup 
 Please refer to the orignal code link above
