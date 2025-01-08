@@ -1,5 +1,5 @@
 # Bandwidth extension (BWE)
-This code is for "Subband Modeling for Artifacts-free Speech Super-resolution" which is subbmitted to ICASSP 2025.
+This code is for "Progressive Subband Modeling for Artifacts-free Speech Super-resolution" which is subbmitted to ICASSP 2025.
 
 * We have provided the traning code and inference code for reproducibility.
 * In addition, we have provided demo samples under "samples" folder.
